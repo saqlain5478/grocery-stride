@@ -1,4 +1,5 @@
 import { Plus, Minus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 
@@ -11,22 +12,26 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   return (
     <div className="glass-card group overflow-hidden hover:border-primary/30 transition-all duration-300">
-      <div className="relative aspect-square overflow-hidden">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
-        />
-        {product.discount && (
-          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-accent text-accent-foreground text-xs font-bold glow-orange">
-            -{product.discount}%
-          </span>
-        )}
-      </div>
+      <Link to={`/product/${product.id}`} className="block">
+        <div className="relative aspect-square overflow-hidden">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+          {product.discount && (
+            <span className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-accent text-accent-foreground text-xs font-bold glow-orange">
+              -{product.discount}%
+            </span>
+          )}
+        </div>
+      </Link>
       <div className="p-4">
         <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
-        <h3 className="font-semibold text-foreground mb-2 truncate">{product.name}</h3>
+        <Link to={`/product/${product.id}`}>
+          <h3 className="font-semibold text-foreground mb-2 truncate hover:text-primary transition-colors">{product.name}</h3>
+        </Link>
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold text-primary">${discountedPrice.toFixed(2)}</span>
