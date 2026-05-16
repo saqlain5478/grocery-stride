@@ -1,13 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, CreditCard, Truck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ name: "", phone: "", address: "", payment: "cod" });
+  const [placing, setPlacing] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/auth", { replace: true });
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("full_name, phone, address").eq("id", user.id).maybeSingle().then(({ data }) => {
+      if (data) setForm((f) => ({
+        ...f,
+        name: data.full_name || f.name,
+        phone: data.phone || f.phone,
+        address: data.address || f.address,
+      }));
+    });
+  }, [user]);
 
   if (items.length === 0 && step < 3) {
     return (
@@ -18,7 +39,29 @@ const Checkout = () => {
     );
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!user) return;
+    setPlacing(true);
+    const orderItems = items.map((i) => ({
+      id: i.product.id,
+      name: i.product.name,
+      price: i.product.discount ? i.product.price * (1 - i.product.discount / 100) : i.product.price,
+      quantity: i.quantity,
+    }));
+    const { error } = await supabase.from("orders").insert({
+      user_id: user.id,
+      items: orderItems,
+      total: totalPrice,
+      full_name: form.name,
+      phone: form.phone,
+      address: form.address,
+      payment_method: form.payment,
+    });
+    setPlacing(false);
+    if (error) {
+      toast.error("Failed to place order. Please try again.");
+      return;
+    }
     clearCart();
     setStep(3);
   };
