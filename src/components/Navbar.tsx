@@ -1,5 +1,6 @@
-import { ShoppingCart, Search, Leaf } from "lucide-react";
+import { ShoppingCart, Search, Leaf, User as UserIcon } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
 
 interface NavbarProps {
@@ -9,6 +10,7 @@ interface NavbarProps {
 
 const Navbar = ({ searchQuery, onSearchChange }: NavbarProps) => {
   const { totalItems, setIsCartOpen } = useCart();
+  const { user } = useAuth();
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -35,17 +37,26 @@ const Navbar = ({ searchQuery, onSearchChange }: NavbarProps) => {
           </div>
         </div>
 
-        <button
-          onClick={() => setIsCartOpen(true)}
-          className="relative p-2.5 rounded-lg bg-secondary hover:bg-primary/20 transition-colors"
-        >
-          <ShoppingCart className="w-5 h-5 text-foreground" />
-          {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center animate-pulse-glow">
-              {totalItems}
-            </span>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            to={user ? "/account" : "/auth"}
+            className="p-2.5 rounded-lg bg-secondary hover:bg-primary/20 transition-colors hidden sm:flex"
+            aria-label={user ? "Account" : "Sign in"}
+          >
+            <UserIcon className="w-5 h-5 text-foreground" />
+          </Link>
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2.5 rounded-lg bg-secondary hover:bg-primary/20 transition-colors"
+          >
+            <ShoppingCart className="w-5 h-5 text-foreground" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center animate-pulse-glow">
+                {totalItems}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </nav>
   );
