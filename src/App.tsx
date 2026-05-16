@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
+import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
