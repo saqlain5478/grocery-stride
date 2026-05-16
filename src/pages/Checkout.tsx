@@ -160,8 +160,8 @@ const Checkout = () => {
                   <span>Total</span><span className="text-primary">${totalPrice.toFixed(2)}</span>
                 </div>
               </div>
-              <button onClick={handleSubmit} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-bold hover:brightness-110 transition-all glow-green">
-                Place Order — ${totalPrice.toFixed(2)}
+              <button onClick={handleSubmit} disabled={placing} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-bold hover:brightness-110 transition-all disabled:opacity-50 glow-green">
+                {placing ? "Placing order..." : `Place Order — $${totalPrice.toFixed(2)}`}
               </button>
             </div>
           )}
