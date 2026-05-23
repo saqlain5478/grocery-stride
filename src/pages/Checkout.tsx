@@ -12,6 +12,18 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ name: "", phone: "", address: "", payment: "cod" });
+  const [card, setCard] = useState({ number: "", name: "", expiry: "", cvc: "" });
+
+  const formatCardNumber = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
+  const formatExpiry = (v: string) => {
+    const d = v.replace(/\D/g, "").slice(0, 4);
+    return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+  };
+  const cardValid =
+    card.number.replace(/\s/g, "").length === 16 &&
+    card.name.trim().length > 1 &&
+    /^\d{2}\/\d{2}$/.test(card.expiry) &&
+    /^\d{3,4}$/.test(card.cvc);
   const [placing, setPlacing] = useState(false);
 
   useEffect(() => {
@@ -149,6 +161,59 @@ const Checkout = () => {
                   </div>
                 </label>
               ))}
+
+              {form.payment === "card" && (
+                <div className="space-y-4 p-4 rounded-lg border border-border bg-secondary/50 animate-fade-in-up">
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1.5">Card Number</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={card.number}
+                      onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })}
+                      placeholder="1234 5678 9012 3456"
+                      className="w-full h-11 px-4 rounded-lg bg-background border border-border text-foreground tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1.5">Cardholder Name</label>
+                    <input
+                      type="text"
+                      value={card.name}
+                      onChange={(e) => setCard({ ...card, name: e.target.value })}
+                      placeholder="John Doe"
+                      className="w-full h-11 px-4 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1.5">Expiry (MM/YY)</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={card.expiry}
+                        onChange={(e) => setCard({ ...card, expiry: formatExpiry(e.target.value) })}
+                        placeholder="12/28"
+                        className="w-full h-11 px-4 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1.5">CVC</label>
+                      <input
+                        type="password"
+                        inputMode="numeric"
+                        maxLength={4}
+                        value={card.cvc}
+                        onChange={(e) => setCard({ ...card, cvc: e.target.value.replace(/\D/g, "") })}
+                        placeholder="123"
+                        className="w-full h-11 px-4 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">🔒 Your payment information is encrypted and secure.</p>
+                </div>
+              )}
+
               <div className="border-t border-border pt-4 space-y-2">
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Subtotal</span><span>${totalPrice.toFixed(2)}</span>
@@ -160,9 +225,14 @@ const Checkout = () => {
                   <span>Total</span><span className="text-primary">${totalPrice.toFixed(2)}</span>
                 </div>
               </div>
-              <button onClick={handleSubmit} disabled={placing} className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-bold hover:brightness-110 transition-all disabled:opacity-50 glow-green">
+              <button
+                onClick={handleSubmit}
+                disabled={placing || (form.payment === "card" && !cardValid)}
+                className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-bold hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed glow-green"
+              >
                 {placing ? "Placing order..." : `Place Order — $${totalPrice.toFixed(2)}`}
               </button>
+
             </div>
           )}
         </div>
