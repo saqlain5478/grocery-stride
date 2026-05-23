@@ -12,6 +12,18 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ name: "", phone: "", address: "", payment: "cod" });
+  const [card, setCard] = useState({ number: "", name: "", expiry: "", cvc: "" });
+
+  const formatCardNumber = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
+  const formatExpiry = (v: string) => {
+    const d = v.replace(/\D/g, "").slice(0, 4);
+    return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+  };
+  const cardValid =
+    card.number.replace(/\s/g, "").length === 16 &&
+    card.name.trim().length > 1 &&
+    /^\d{2}\/\d{2}$/.test(card.expiry) &&
+    /^\d{3,4}$/.test(card.cvc);
   const [placing, setPlacing] = useState(false);
 
   useEffect(() => {
